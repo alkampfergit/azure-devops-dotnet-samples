@@ -47,7 +47,7 @@ namespace Microsoft.TeamServices.Samples.Client
                     if (!context.TryGetValue<Guid>("projectId", out projectId))
                     {
                         // Get the first project
-                        project = projectClient.GetProjects(null, top: 1).Result.FirstOrDefault();
+                        project = projectClient.GetProjects(null, top: 100).Result.FirstOrDefault(p => p.Name.Contains("TailspinToys"));
                     }
                     else
                     {

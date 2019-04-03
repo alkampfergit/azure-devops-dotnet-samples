@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.TeamFoundation.Test.WebApi;
 using Microsoft.TeamFoundation.TestManagement.WebApi;
 using Microsoft.VisualStudio.Services.TestManagement.TestPlanning.WebApi;
 using Microsoft.VisualStudio.Services.WebApi;
@@ -18,8 +19,7 @@ namespace Microsoft.TeamServices.Samples.Client.Test
             // Get a testplan client instance
             VssConnection connection = Context.Connection;
             TestPlanHttpClient testPlanClient = connection.GetClient<TestPlanHttpClient>();
-
-
+            
             // Get Test configurations
             List<TestConfiguration> configurations = testPlanClient.GetTestConfigurationsAsync(projectName).Result;
 
@@ -29,6 +29,36 @@ namespace Microsoft.TeamServices.Samples.Client.Test
                 Context.Log("{0} {1}", configuration.Id.ToString().PadLeft(6), configuration.Name);
             }
             return configurations;
+        }
+
+        [ClientSampleMethod]
+        public List<TestRun> GetTestRuns()
+        {
+            var project = ClientSampleHelpers.FindAnyProject(this.Context);
+
+            // Get a testplan client instance
+            VssConnection connection = Context.Connection;
+            var testClient = connection.GetClient<TestManagementHttpClient>();
+
+            // Get Test configurations
+            //var runs = testClient.GetTestRunsAsync(project.Id, includeRunDetails: true).Result;
+
+            QueryModel qm = new QueryModel("Select * From TestRun");
+
+            List<TestRun> testruns = testClient.GetTestRunsByQueryAsync(qm, project.Name, includeRunDetails: true).Result;
+            foreach (TestRun testrun in testruns)
+            {
+
+                List<TestCaseResult> testresults = testClient.GetTestResultsAsync(project.Name, testrun.Id).Result;
+                foreach (TestCaseResult tcr in testresults)
+                {
+                    Console.WriteLine(tcr.TestCase.Name);
+                    Console.WriteLine(tcr.Outcome);
+                }
+
+                Console.ReadLine();
+            }
+            return testruns;
         }
 
         [ClientSampleMethod]
